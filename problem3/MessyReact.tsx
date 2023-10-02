@@ -75,7 +75,7 @@ const WalletPage: React.FC<Props> = (props: Props) => {
       formatted: balance.amount.toFixed()
     }
   })
-  // Anti-pattern #4: Mapping sortedBalances to rows can be combined into a single loop.
+  // Anti-pattern: Mapping sortedBalances to rows can be combined into a single loop.
   const rows = sortedBalances.map((balance: FormattedWalletBalance, index: number) => {
     const usdValue = prices[balance.currency] * balance.amount;
     return (
@@ -106,9 +106,7 @@ interface WalletBalance {
   blockchain: string;
 }
 
-interface Props extends BoxProps { }
-
-const WalletPage: React.FC<Props> = (props: Props) => {
+const WalletPage: React.FC<Props> = (props: BoxProps) => {
   const { children, ...rest } = props;
   const balances = useWalletBalances();
   const prices = usePrices();
