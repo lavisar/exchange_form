@@ -11,6 +11,10 @@ interface FormattedWalletBalance {
 interface Props extends BoxProps {
 
 }
+/*
+ * If dont have any private properties to Props, consider using props: BoxProps
+ * Should: const WalletPage: React.FC<Props> = (props: BoxProps) 
+ */
 const WalletPage: React.FC<Props> = (props: Props) => {
   const { children, ...rest } = props;
   const balances = useWalletBalances();
