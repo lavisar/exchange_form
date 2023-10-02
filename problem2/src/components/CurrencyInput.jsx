@@ -2,19 +2,21 @@ import { Dialog, Transition } from "@headlessui/react";
 import axios from "axios";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { HiMagnifyingGlass } from "react-icons/hi2";
+import { AiOutlineCheck } from "react-icons/ai";
 
-const PriceInput = ({ title = "", value, onPriceChange }) => {
+const PriceInput = ({ title = "", value = 0, onPriceChange }) => {
 	const [amount, setAmount] = useState(0);
-	const [tokenValue, setTokentValue] = useState({
-		img: "",
-		name: "",
-		price: 0,
-	});
+	const [tokenValue, setTokentValue] = useState({img: "", name: "", price: 0,});
 	const [isOpen, setIsOpen] = useState(false);
 	const cancelButtonRef = useRef(null);
 	const [tokenIcons, setTokenIcons] = useState([]);
 	const [tokenData, setTokenData] = useState([]);
-
+	const [filterData, setFilternData] = useState([]);
+	
+	useEffect(() => {
+		onPriceChange(amount, tokenValue.price);
+	}, [tokenValue.price]);
+	// fetch and init data token and icon
 	useEffect(() => {
 		async function fetchTokenIcons() {
 			try {
@@ -52,10 +54,11 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 		}
 		fetchTokenData();
 	}, []);
-
-	useEffect(() => {
-    onPriceChange(amount, tokenValue.price);
-  }, [tokenValue.price]);
+	// handel filter 
+	const handleInputFilter = (value) => {
+    let valueInput = value.toLowerCase()
+    setFilternData([...tokenData.filter((item) => item.currency.toLowerCase().includes(valueInput))])
+  }
 
 	return (
 		<div className="bg-[#1b1b1b] rounded-[12px] shadow-none p-4">
@@ -63,8 +66,9 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 			<div className="flex justify-between">
 				<input
 					className="text-[#9b9b9b] bg-inherit outline-none text-4xl w-2/3"
-					value={value.amount || amount}
-					onChange={e => setAmount(e.target.value)}
+					placeholder="0"
+					value={value || amount}
+					onChange={(e) => setAmount(e.target.value)}
 					name="amount"
 					pattern="^[0-9]*[.,]?[0-9]*$"
 					maxLength="79"
@@ -74,9 +78,13 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 					{tokenValue.price !== 0 ? (
 						<div
 							onClick={() => setIsOpen(true)}
-							className="bg-[#131313] font-semibold text-[#ffffff] py-1 px-1.5 rounded-[16px] cursor-pointer flex"
+							className="bg-[#131313] flex items-center font-semibold text-[#ffffff] py-1 px-2 rounded-[16px] cursor-pointer"
 						>
-							<img src={tokenValue.img} alt="" className="w-5 h-5" />
+							<img
+								src={tokenValue.img}
+								alt=""
+								className="w-5 h-5"
+							/>
 							<p className="ml-2">{tokenValue.name}</p>
 						</div>
 					) : (
@@ -90,6 +98,7 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 				</div>
 			</div>
 			<div className="h-4"></div>
+
 			{/* modal select token */}
 			<Transition.Root
 				show={isOpen}
@@ -110,11 +119,11 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 						leaveFrom="opacity-100"
 						leaveTo="opacity-0"
 					>
-						<div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+						<div className="fixed inset-0 bg-[#00000099] bg-opacity-75 transition-opacity" />
 					</Transition.Child>
 
-					<div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-						<div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+					<div className="fixed inset-0 z-10 w-screen overflow-y-auto ">
+						<div className="flex min-h-full items-end justify-center  p-4 text-center sm:items-center sm:p-0">
 							<Transition.Child
 								as={Fragment}
 								enter="ease-out duration-300"
@@ -164,17 +173,19 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 														</svg>
 													</div>
 												</Dialog.Title>
-												<div className="mt-2 flex bg-[#1b1b1b] w-full px-3 py-2 items-center mb-5 rounded-[24px]">
+												<div className="mt-2 flex bg-[#1b1b1b] border border-[#ffffff12] w-full px-3 py-2 items-center mb-5 rounded-[24px]">
 													<HiMagnifyingGlass className="text-white text-xl mr-2" />
 													<input
 														type="text"
 														className="bg-inherit px-2 w-full outline-none text-white"
 														placeholder="Search name or paste address"
+														onChange={e => handleInputFilter(e.target.value)}
 													/>
 												</div>
-												<div className="my-2 border-t border-white"></div>
+												<div className="my-2 border-t border-[#ffffff12]"></div>
+												{/* list token */}
 												<div className="h-80 overflow-y-scroll">
-													{tokenData.map(
+													{(filterData.length !== 0 ? filterData : tokenData).map(
 														(item, index) => {
 															const matchingIcons =
 																tokenIcons.filter(
@@ -221,7 +232,7 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 																						false
 																					);
 																				}}
-																				className="flex items-center hover:bg-[#98a1c014] pl-2 py-3 cursor-pointer"
+																				className='flex items-center hover:bg-[#98a1c014] pl-2 py-3 cursor-pointer'
 																			>
 																				<img
 																					src={
@@ -237,6 +248,7 @@ const PriceInput = ({ title = "", value, onPriceChange }) => {
 																						}
 																					</p>
 																				</div>
+																				<div className={`${tokenValue.price === item.price ? 'inline-block text-[#fc72ff] text-base ml-auto mr-4'  : 'hidden'}`}><AiOutlineCheck/></div>
 																			</div>
 																		)
 																	)}

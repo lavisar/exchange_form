@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PriceInput from "./CurrencyInput";
 import { AiOutlineArrowDown } from "react-icons/ai";
+import { IoMdSettings } from "react-icons/io";
 
 const CurrencySwapForm = () => {
 	const [payPrice, setPayPrice] = useState({});
 	const [receivePrice, setReceivePrice] = useState({});
 
-	console.log('payPrice', payPrice);
-	console.log('receivePrice', receivePrice);
+	const [calculatedPayPrice, setCalculatedPayPrice] = useState(0);
+	const [calculatedReceivePrice, setCalculatedReceivePrice] = useState(0);
+
+	useEffect(() => {
+		if (payPrice.amount > 0 && payPrice.currency > 0 && receivePrice.currency > 0) {
+			setCalculatedReceivePrice((payPrice.amount * payPrice.currency / receivePrice.currency).toFixed(8))
+		} else if (receivePrice.amount > 0 && receivePrice.currency > 0 && payPrice.currency){
+			setCalculatedPayPrice((receivePrice.amount * receivePrice.currency / payPrice.currency).toFixed(8))
+		}
+	}, [payPrice.amount, payPrice.currency, receivePrice]);
 
 	const onSwapPayReceive = (event) => {
 		event.preventDefault();
@@ -16,7 +25,6 @@ const CurrencySwapForm = () => {
 	const handlePayPriceChange = (amount, currency) => {
 		setPayPrice({ amount, currency });
 	};
-
 	const handleReceivePriceChange = (amount, currency) => {
 		setReceivePrice({ amount, currency });
 	};
@@ -29,13 +37,16 @@ const CurrencySwapForm = () => {
 					"rgba(252, 114, 255, 0.08) 0px 0px 10px 0px, rgba(252, 114, 255, 0.18) 0px 40px 120px 0px",
 			}}
 		>
-			<h3 className="text-2xl text-white px-4 py-2">Currency Swap</h3>
+			<div className="flex items-center justify-between px-5 pt-2">
+			<p className="text-xl text-white">Swap</p>
+			<IoMdSettings className="text-2xl text-[#8f8888] cursor-pointer"/>
+			</div>
 			<form className="px-4 py-2 relative" onSubmit={onSwapPayReceive}>
 				<div className="mb-1.5">
 					<PriceInput
 						title="You pay"
+						value={calculatedPayPrice}
 						onPriceChange={handlePayPriceChange}
-						value={payPrice}
 					/>
 				</div>
 				<button
@@ -47,8 +58,8 @@ const CurrencySwapForm = () => {
 				<div className="mb-1.5">
 					<PriceInput
 						title="You receive"
+						value={calculatedReceivePrice}
 						onPriceChange={handleReceivePriceChange}
-						value={receivePrice}
 					/>
 				</div>
 				<button className="p-4 bg-[#311c31] hover:opacity-60 w-full rounded-[12px] mb-2">
